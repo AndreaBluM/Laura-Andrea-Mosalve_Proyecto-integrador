@@ -7,10 +7,12 @@ import db.backend.clinicamvc.Dto.response.TurnoResponseDto;
 import db.backend.clinicamvc.entity.Odontologo;
 import db.backend.clinicamvc.entity.Paciente;
 import db.backend.clinicamvc.entity.Turno;
+import db.backend.clinicamvc.exception.ResourceNotFoundException;
 import db.backend.clinicamvc.repository.IOdontologoRepository;
 import db.backend.clinicamvc.repository.IPacienteRepository;
 import db.backend.clinicamvc.repository.ITurnoRepository;
 import db.backend.clinicamvc.service.ITurnoService;
+import org.apache.coyote.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +37,7 @@ public class TurnoService implements ITurnoService {
     }
 
     @Override
-    public TurnoResponseDto registrar(TurnoRequestDto turnoRequestDto) {
+    public TurnoResponseDto registrar(TurnoRequestDto turnoRequestDto) throws BadRequestException {
         Optional<Paciente> paciente = pacienteRepository.findById(turnoRequestDto.getPaciente_id());
         Optional<Odontologo> odontologo = odontologoRepository.findById(turnoRequestDto.getOdontologo_id());
         Turno turnoARegistrar = new Turno();
@@ -48,6 +50,8 @@ public class TurnoService implements ITurnoService {
             turnoARegistrar.setFecha(LocalDate.parse(turnoRequestDto.getFecha()));
             turnoGuardado = turnoRepository.save(turnoARegistrar);
             turnoADevolver = mapToResponseDtop(turnoGuardado);
+        }else{
+            throw new BadRequestException("{\"message\": \"turno no encontrado\"}");
         }
         return turnoADevolver;
     }
@@ -78,7 +82,7 @@ public class TurnoService implements ITurnoService {
 
 
     @Override
-    public void actualizarTurno(Integer id, TurnoRequestDto turnoRequestDto) {
+    public void actualizarTurno(Integer id, TurnoRequestDto turnoRequestDto) throws BadRequestException {
         Optional<Paciente> paciente = pacienteRepository.findById(turnoRequestDto.getPaciente_id());
         Optional<Odontologo> odontologo = odontologoRepository.findById(turnoRequestDto.getOdontologo_id());
         Optional<Turno> turno1 = turnoRepository.findById(id);
@@ -89,12 +93,19 @@ public class TurnoService implements ITurnoService {
             turnoAModificar.setPaciente(paciente.get());
             turnoAModificar.setFecha(LocalDate.parse(turnoRequestDto.getFecha()));
             turnoRepository.save(turnoAModificar);
+        } else {
+            throw new BadRequestException("{\"message\": \"turno no encontrado\"}");
         }
+
     }
 
     @Override
-    public void eliminarTurno(Integer id) {
-        turnoRepository.deleteById(id);
+    public void eliminarTurno(Integer id) throws ResourceNotFoundException {
+        TurnoResponseDto turnoResponseDto = buscarPorId(id);
+        if(turnoResponseDto !=null)
+            turnoRepository.deleteById(id);
+        else
+            throw new ResourceNotFoundException("{\"message\": \"turno no encontrado\"}");
     }
 
     @Override

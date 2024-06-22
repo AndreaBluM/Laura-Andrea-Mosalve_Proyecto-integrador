@@ -2,6 +2,7 @@ package db.backend.clinicamvc.service;
 
 import db.backend.clinicamvc.entity.Domicilio;
 import db.backend.clinicamvc.entity.Paciente;
+import db.backend.clinicamvc.exception.ResourceNotFoundException;
 import db.backend.clinicamvc.service.impl.PacienteService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,7 +50,7 @@ class PacienteServiceTest {
 
     @Test
     @DisplayName("Testear busqueda paciente por id")
-    void testPacientePorId(){
+    void testPacientePorId() throws ResourceNotFoundException {
         Integer id = 1;
         Optional<Paciente> pacienteEncontrado = pacienteService.buscarPorId(id);
         Paciente paciente1 = pacienteEncontrado.get();

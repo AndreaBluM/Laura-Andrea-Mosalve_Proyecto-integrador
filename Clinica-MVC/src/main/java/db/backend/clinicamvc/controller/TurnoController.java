@@ -3,7 +3,9 @@ package db.backend.clinicamvc.controller;
 import db.backend.clinicamvc.Dto.request.TurnoRequestDto;
 import db.backend.clinicamvc.Dto.response.TurnoResponseDto;
 import db.backend.clinicamvc.entity.Turno;
+import db.backend.clinicamvc.exception.ResourceNotFoundException;
 import db.backend.clinicamvc.service.ITurnoService;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,13 +24,10 @@ public class TurnoController {
     }
 
     @PostMapping
-    public ResponseEntity<TurnoResponseDto> registrarTurno(@RequestBody TurnoRequestDto turno){
+    public ResponseEntity<TurnoResponseDto> registrarTurno(@RequestBody TurnoRequestDto turno) throws BadRequestException {
         TurnoResponseDto turnoARetornar = turnoService.registrar(turno);
-        if(turnoARetornar == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        } else {
-            return ResponseEntity.status(HttpStatus.CREATED).body(turnoARetornar);
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(turnoARetornar);
+
     }
 
     @GetMapping
@@ -47,15 +46,15 @@ public class TurnoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> actualizarTurno(@PathVariable Integer id, TurnoRequestDto turno){
+    public ResponseEntity<String> actualizarTurno(@PathVariable Integer id, TurnoRequestDto turno) throws BadRequestException {
          turnoService.actualizarTurno(id, turno);
-        return ResponseEntity.ok("Turno actualizado");
+        return ResponseEntity.ok("{\"message\": \"turno actualizado\"}");
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> borrarTurno(@PathVariable Integer id){
+    public ResponseEntity<String> borrarTurno(@PathVariable Integer id) throws ResourceNotFoundException {
         turnoService.eliminarTurno(id);
-        return ResponseEntity.ok("turno eliminado");
+        return ResponseEntity.ok("{\"message\": \"turno eliminado\"}");
     }
 
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
